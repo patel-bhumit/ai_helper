@@ -9,7 +9,7 @@ import {
   orderBy,
   limit,
 } from 'firebase/firestore';
-
+  
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
@@ -28,30 +28,58 @@ const firebaseConfig = {
   measurementId: "G-81W6Y0WLJ9"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const docRef = collection(db, 'bot');
+const docRef2 = collection(db, 'chat_bot');
 
 function App() {
   const [text, setText] = useState('');
-  const [summary, setsummary] = useState('');
+  const [prompt, setPrompt] = useState('');
+  const [summary, setSummary] = useState('');
+  const [response, setResponse] = useState('');
+  const [showResults, setShowResults] = useState(false); // New state for showing results
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(
+    const savedText = localStorage.getItem('text');
+    if (savedText) {
+      setText(savedText);
+      setPrompt(savedText);
+    }
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe1 = onSnapshot(
       query(docRef, orderBy('createdAt', 'desc'), limit(1)),
       (snapshot) => {
         snapshot.forEach((doc) => {
           const data = doc.data();
-          setsummary(data.summary);
+          setSummary(data.summary);
         });
       }
     );
-    return () => unsubscribe();
+
+    const unsubscribe2 = onSnapshot(
+      query(docRef2, orderBy('createdAt', 'desc'), limit(1)),
+      (snapshot) => {
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          setResponse(data.response);
+        });
+      }
+    );
+
+    return () => {
+      unsubscribe1();
+      unsubscribe2();
+    };
   }, []);
 
   const handleInputChange = (e) => {
-    setText(e.target.value);
+    const newText = e.target.value;
+    setText(newText);
+    setPrompt(newText);
+    localStorage.setItem('text', newText);
   };
 
   const handleSubmit = async (e) => {
@@ -59,41 +87,59 @@ function App() {
     try {
       console.log('Adding text to Cloud Firestore');
       await addDoc(docRef, { text, createdAt: new Date() });
+      await addDoc(docRef2, { prompt, createdAt: new Date() });
       console.log('Text added successfully');
     } catch (error) {
       console.error('Error adding text:', error);
     }
+
+    setResponse('');
+    setSummary('');
     setText('');
+    localStorage.removeItem('text');
+    
+    // Show results when the form is submitted
+    setShowResults(true);
   };
 
   return (
-    <div>
-      <h2>Text Summarizer App</h2>
+    <div className="container">
+      <h2 className="title">Assignment Summarizer</h2>
       <form onSubmit={handleSubmit}>
         <textarea
-          type='text'
+          type="text"
           value={text}
           onChange={handleInputChange}
-          placeholder='Enter text'
+          placeholder="Enter text"
+          className="text-area"
         />
         <br />
         <br />
-        <button
-          style={{
-            backgroundColor: 'white',
-            color: 'black',
-          }}
-          type='submit'
-        >
-          Submit
+        <button type="submit" className="button">
+          Generate
         </button>
       </form>
       <br />
-      <h3>Summary:</h3>
-      <div className='summary' style={{ fontSize: '12px' }}>
-        {summary}
-      </div>
+      {showResults && (
+        <div>
+          <h3>Summary:</h3>
+          <p className="summary" style={{ fontSize: '20px' }}>
+            {summary}
+          </p>
+          <br />
+          <br />
+          <h3>Time Based Distribution:</h3>
+          <p className="response" style={{ fontSize: '20px' }}>
+            {response}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
+
 export default App;
+
+
+
+
