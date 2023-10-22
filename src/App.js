@@ -128,7 +128,7 @@ function App() {
           </p>
           <br />
           <br />
-          <h3>Time Based Distribution:</h3>
+          <h3>Instructions:</h3>
           <p className="response" style={{ fontSize: '20px' }}>
             {response}
           </p>

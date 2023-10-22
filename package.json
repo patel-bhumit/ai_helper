@@ -13,7 +13,7 @@
     "web-vitals": "^2.1.4"
   },
 
-  "homepage": "https://patel-bhumit.github.io/ai_helper"
+  "homepage": "https://patel-bhumit.github.io/ai_helper",
 
   "scripts": {
     "start": "react-scripts start",
