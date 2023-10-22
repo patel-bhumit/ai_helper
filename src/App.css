@@ -14,14 +14,33 @@
 }
 
 .App-header {
-  background-color: #282c34;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+}
+
+.lable{
+  padding: 10px;
+
+}
+
+.input_area{
+  align-items: center;
+  border: black 1px solid;
+  border-radius: 5px;
+  justify-content: center;
+  margin: 10px;
+  font-size: calc(5px + 2vmin);
+}
+
+.btn{
+  border: black 1px solid;
+  margin: 5px;
+  border-radius: 5px;
+  padding: 5px;
 }
 
 .App-link {
